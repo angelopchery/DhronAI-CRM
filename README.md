@@ -1,4 +1,4 @@
-# CRMSarvam
+# DhronAI CRM
 
 A production-grade **CRM + ERP hybrid system** with AI-powered transcription and task intelligence.
 
