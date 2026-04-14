@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db, init_db
-from app.routers import auth, users, clients, events, intelligence, transcriptions
+from app.routers import auth, users, clients, events, intelligence, transcriptions, calendar as calendar_router
 from app.services.user_service import UserService
 from app.schemas.user import UserCreate
 
@@ -146,6 +146,7 @@ app.include_router(clients.poc_router)
 app.include_router(events.router)
 app.include_router(intelligence.router)
 app.include_router(transcriptions.router)
+app.include_router(calendar_router.router)
 
 
 @app.get("/")

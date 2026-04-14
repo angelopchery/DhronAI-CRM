@@ -26,8 +26,9 @@ httpx==0.26.0
 # Retry mechanism
 tenacity==8.2.3
 
-# Date parsing (optional, for better date extraction)
+# Date parsing
 python-dateutil==2.8.2
+dateparser==1.2.0
 
 # Sarvam AI SDK (optional - can use HTTP implementation)
 # sarvamai==1.0.0  # Uncomment if using the official SDK

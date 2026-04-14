@@ -82,12 +82,25 @@ async def _persist_intelligence(event_id: int, follow_ups, deadlines) -> tuple[i
         for fu in follow_ups:
             db.add(FollowUp(event_id=event_id, description=fu.description, date=fu.date))
         for dl in deadlines:
-            deadline = Deadline(event_id=event_id, description=dl.description, due_date=dl.due_date)
+            deadline = Deadline(
+                event_id=event_id,
+                description=dl.description,
+                due_date=dl.due_date,
+                end_datetime=getattr(dl, "end_datetime", None),
+            )
             db.add(deadline)
             await db.flush()
             db.add(Task(deadline_id=deadline.id, status="pending"))
         await db.commit()
     return len(follow_ups), len(deadlines)
+
+
+async def _get_event_datetime(event_id: int):
+    """Fetch the parent event's scheduled datetime to anchor relative dates."""
+    from app.models import Event  # local import to avoid cycle at module load
+    async with worker_session_maker() as db:
+        event = await db.get(Event, event_id)
+        return event.datetime if event else None
 
 
 async def _process_transcription_async(task, transcription_id: int, file_path: str, file_type: str) -> dict:
@@ -135,8 +148,10 @@ async def _process_transcription_async(task, transcription_id: int, file_path: s
             language_code="auto",
         )
 
+        event_anchor = await _get_event_datetime(event_id)
         follow_ups, deadlines = intelligence_extractor.extract_from_transcript(
-            transcription_result["transcript_text"]
+            transcription_result["transcript_text"],
+            event_datetime=event_anchor,
         )
     except Exception as e:
         logger.exception(f"Transcription {transcription_id} failed: {e}")

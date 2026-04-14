@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Building2 } from 'lucide-react';
+import { Sparkles, Mic, Target, CheckCircle2 } from 'lucide-react';
 
 export default function Login() {
   const [username, setUsername] = useState('');
@@ -15,7 +15,6 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       await login({ username, password });
       navigate('/');
@@ -27,80 +26,105 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-primary-100">
-            <Building2 className="h-8 w-8 text-primary-600" />
+    <div className="min-h-screen grid lg:grid-cols-2">
+      {/* ====== Brand panel ====== */}
+      <aside className="hidden lg:flex flex-col justify-between relative overflow-hidden bg-ink-900 text-white p-12">
+        <div className="absolute inset-0 bg-brand-radial opacity-90 pointer-events-none" />
+        <div className="relative">
+          <div className="flex items-center gap-2 mb-12">
+            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-brand-gradient shadow-glow-lg">
+              <Sparkles className="w-5 h-5 text-white" />
+            </span>
+            <span className="text-2xl font-bold">
+              <span className="text-white">CRM</span>
+              <span className="gradient-text">Sarvam</span>
+            </span>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            CRMSarvam
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in to your account
+
+          <h1 className="text-4xl xl:text-5xl font-bold leading-tight text-white">
+            Your <span className="gradient-text">intelligence partner</span><br /> for every conversation.
+          </h1>
+          <p className="mt-6 text-ink-300 text-lg max-w-md">
+            Upload meetings, let AI transcribe them, and watch action items appear on your calendar — automatically.
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="p-4 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
+        <ul className="relative space-y-3 text-ink-200 text-sm">
+          <Feature icon={Mic}        label="AI transcription with Sarvam Saaras v3" />
+          <Feature icon={Target}     label="Auto-extracted follow-ups & deadlines" />
+          <Feature icon={CheckCircle2} label="Smart calendar with drag-and-drop" />
+        </ul>
+      </aside>
 
-          <div className="space-y-4">
+      {/* ====== Form ====== */}
+      <main className="flex items-center justify-center p-6 lg:p-12">
+        <div className="w-full max-w-sm">
+          <div className="lg:hidden mb-8 text-center">
+            <span className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-gradient shadow-glow-lg">
+              <Sparkles className="w-6 h-6 text-white" />
+            </span>
+            <h2 className="mt-4 text-2xl font-bold">
+              <span className="text-ink-900">CRM</span><span className="gradient-text">Sarvam</span>
+            </h2>
+          </div>
+
+          <h2 className="text-2xl font-bold text-ink-900">Welcome back</h2>
+          <p className="mt-1 text-sm text-ink-500">Sign in to your workspace.</p>
+
+          <form className="mt-8 space-y-4" onSubmit={handleSubmit}>
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">{error}</div>
+            )}
+
             <div>
-              <label htmlFor="username" className="sr-only">
-                Username
-              </label>
+              <label htmlFor="username" className="block text-xs font-semibold text-ink-600 mb-1.5 uppercase tracking-wider">Username</label>
               <input
                 id="username"
-                name="username"
                 type="text"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="input"
-                placeholder="Username"
+                placeholder="you@company.com"
                 disabled={loading}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
+              <label htmlFor="password" className="block text-xs font-semibold text-ink-600 mb-1.5 uppercase tracking-wider">Password</label>
               <input
                 id="password"
-                name="password"
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="input"
-                placeholder="Password"
+                placeholder="••••••••"
                 disabled={loading}
               />
             </div>
-          </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full btn btn-primary"
-            >
-              {loading ? 'Signing in...' : 'Sign in'}
+            <button type="submit" disabled={loading} className="w-full btn-primary mt-2">
+              {loading ? 'Signing in…' : 'Sign in'}
             </button>
-          </div>
-        </form>
+          </form>
 
-        <div className="text-center">
-          <p className="text-sm text-gray-500">
-            CRM with AI-Powered Transcription
+          <p className="mt-8 text-center text-xs text-ink-400">
+            CRM with AI-powered transcription • Built for Bharat
           </p>
         </div>
-      </div>
+      </main>
     </div>
+  );
+}
+
+function Feature({ icon: Icon, label }) {
+  return (
+    <li className="flex items-center gap-3">
+      <span className="w-8 h-8 rounded-lg bg-white/10 backdrop-blur-sm flex items-center justify-center">
+        <Icon className="w-4 h-4 text-primary-400" />
+      </span>
+      {label}
+    </li>
   );
 }

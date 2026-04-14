@@ -96,6 +96,12 @@ export const eventsAPI = {
   }),
 };
 
+// Calendar API (unified feed + drag-drop updates)
+export const calendarAPI = {
+  list: () => api.get('/api/calendar/events'),
+  update: (id, data) => api.put(`/api/calendar/event/${id}`, data),
+};
+
 // Intelligence API
 export const intelligenceAPI = {
   followUps: {

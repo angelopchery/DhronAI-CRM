@@ -1,9 +1,9 @@
 """
 Intelligence models for follow-ups, deadlines, and tasks.
 """
-from datetime import datetime, date
+from datetime import datetime
 
-from sqlalchemy import String, Text, ForeignKey, Date, DateTime, Boolean
+from sqlalchemy import String, Text, ForeignKey, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -13,12 +13,8 @@ class FollowUp(Base):
     """
     FollowUp model for tracking action items from events.
 
-    Attributes:
-        id: Primary key
-        event_id: Foreign key to events table
-        description: Follow-up description
-        date: Optional follow-up date
-        created_at: Record creation timestamp
+    The `date` column stores the full scheduled datetime (not just a calendar
+    date) so the calendar UI can render follow-ups at their extracted time.
     """
 
     __tablename__ = "follow_ups"
@@ -28,10 +24,9 @@ class FollowUp(Base):
         ForeignKey("events.id", ondelete="CASCADE"), index=True, nullable=False
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    date: Mapped[date | None] = mapped_column(Date, nullable=True, index=True)
+    date: Mapped[datetime | None] = mapped_column(DateTime, nullable=True, index=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)
 
-    # Relationships
     event: Mapped["Event"] = relationship(back_populates="follow_ups")
 
     def __repr__(self) -> str:
@@ -42,12 +37,10 @@ class Deadline(Base):
     """
     Deadline model for tracking due dates from events.
 
-    Attributes:
-        id: Primary key
-        event_id: Foreign key to events table
-        description: Deadline description
-        due_date: Due date
-        created_at: Record creation timestamp
+    `due_date` is the primary datetime. `end_datetime` is an optional upper
+    bound when the extractor infers a range (e.g. "before the meeting" →
+    [start_of_day, meeting_time]). When None, the deadline renders as a
+    point-in-time / all-day marker in the calendar UI.
     """
 
     __tablename__ = "deadlines"
@@ -57,10 +50,10 @@ class Deadline(Base):
         ForeignKey("events.id", ondelete="CASCADE"), index=True, nullable=False
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    due_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    due_date: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
+    end_datetime: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)
 
-    # Relationships
     event: Mapped["Event"] = relationship(back_populates="deadlines")
     tasks: Mapped[list["Task"]] = relationship(
         back_populates="deadline", lazy="selectin", cascade="all, delete-orphan"
@@ -71,16 +64,7 @@ class Deadline(Base):
 
 
 class Task(Base):
-    """
-    Task model for tracking completion of deadlines.
-
-    Attributes:
-        id: Primary key
-        deadline_id: Foreign key to deadlines table
-        status: Task status (pending, completed)
-        completed_at: Task completion timestamp
-        created_at: Record creation timestamp
-    """
+    """Task model for tracking completion of deadlines."""
 
     __tablename__ = "tasks"
 
@@ -92,7 +76,6 @@ class Task(Base):
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow, nullable=False)
 
-    # Relationships
     deadline: Mapped["Deadline"] = relationship(back_populates="tasks")
 
     def __repr__(self) -> str:
