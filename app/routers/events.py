@@ -221,34 +221,52 @@ async def upload_event_media(
             detail=f"File type not allowed. Allowed: {settings.allowed_extensions}",
         )
 
-    # Check file size
-    file_size = 0
-    content = await file.read()
-    file_size = len(content)
-
-    if file_size > settings.MAX_UPLOAD_SIZE:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"File too large. Maximum size: {settings.MAX_UPLOAD_SIZE // (1024 * 1024)}MB",
-        )
-
-    # Generate unique filename
+    # Stream the upload to disk in chunks instead of buffering the whole body in RAM.
     file_ext = Path(file.filename).suffix.lower()
     unique_filename = f"{uuid.uuid4()}{file_ext}"
     file_path = Path(settings.UPLOAD_DIR) / unique_filename
+    file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Save file
+    max_bytes = settings.MAX_UPLOAD_SIZE
+    chunk_size = 1024 * 1024  # 1 MB
+    file_size = 0
+    oversized = False
+
     try:
-        file_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(file_path, "wb") as f:
-            f.write(content)
-        logger.info(f"File saved: {file_path}")
+        with open(file_path, "wb") as out:
+            while True:
+                chunk = await file.read(chunk_size)
+                if not chunk:
+                    break
+                file_size += len(chunk)
+                if file_size > max_bytes:
+                    oversized = True
+                    break
+                out.write(chunk)
     except Exception as e:
         logger.error(f"Failed to save file: {e}")
+        try:
+            file_path.unlink()
+        except FileNotFoundError:
+            pass
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to save uploaded file",
         )
+
+    if oversized:
+        try:
+            file_path.unlink()
+        except FileNotFoundError:
+            pass
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large. Maximum size: {max_bytes // (1024 * 1024)}MB",
+        )
+
+    logger.info(
+        f"File saved: {file_path} (name={file.filename}, type={file_type}, size={file_size / (1024 * 1024):.2f}MB)"
+    )
 
     # Create media record
     media_service = EventMediaService(db, upload_dir=settings.UPLOAD_DIR)

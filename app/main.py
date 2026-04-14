@@ -9,7 +9,9 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware
 from sqlalchemy import text
 from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -98,6 +100,29 @@ app = FastAPI(
     version=settings.APP_VERSION,
     lifespan=lifespan,
 )
+
+class LimitUploadSizeMiddleware(BaseHTTPMiddleware):
+    """Reject requests whose Content-Length exceeds MAX_UPLOAD_SIZE up-front."""
+
+    def __init__(self, app, max_size: int):
+        super().__init__(app)
+        self.max_size = max_size
+
+    async def dispatch(self, request, call_next):
+        content_length = request.headers.get("content-length")
+        if content_length:
+            try:
+                if int(content_length) > self.max_size:
+                    return JSONResponse(
+                        {"detail": f"File too large. Maximum size: {self.max_size // (1024 * 1024)}MB"},
+                        status_code=413,
+                    )
+            except ValueError:
+                pass
+        return await call_next(request)
+
+
+app.add_middleware(LimitUploadSizeMiddleware, max_size=settings.MAX_UPLOAD_SIZE)
 
 # Configure CORS
 app.add_middleware(
