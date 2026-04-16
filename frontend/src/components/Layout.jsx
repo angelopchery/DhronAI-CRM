@@ -59,14 +59,15 @@ export default function Layout() {
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
       >
         <div className="flex flex-col h-full bg-sidebar-glow">
-          {/* Logo — height 40px, object-contain */}
-          <div className="flex items-center gap-2.5 h-16 px-4 border-b border-ink-800">
-            <Link to="/" className="flex items-center gap-2.5 w-full">
+          {/* Logo — brand anchor, 60px logo within a ~100px header (20px vertical padding) */}
+          <div className="flex items-center h-[100px] px-5 border-b border-ink-800">
+            <Link to="/" className="flex items-center w-full py-5">
               <img
                 src="/dhronai-logo.svg"
                 alt="DhronAI"
-                className="h-9 w-auto object-contain shrink-0"
-                style={{ maxHeight: 40 }}
+                className="w-auto object-contain shrink-0 select-none"
+                style={{ height: 60, maxHeight: 64, objectFit: 'contain' }}
+                draggable={false}
               />
             </Link>
             <button
@@ -134,7 +135,7 @@ export default function Layout() {
       <div className="flex flex-col min-h-screen lg:ml-[240px]">
         {/* Header — aligned with content, same left offset via main-wrapper margin */}
         <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-ink-200/60">
-          <div className="flex items-center justify-between gap-4 h-16 px-6">
+          <div className="flex items-center justify-between gap-4 h-[100px] px-6">
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={() => setMobileOpen(true)}

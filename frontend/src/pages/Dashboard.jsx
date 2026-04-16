@@ -96,18 +96,28 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* ========== Hero / AI banner ========== */}
-      <section className="relative overflow-hidden rounded-3xl bg-ink-900 text-white p-6 lg:p-8 shadow-lift">
+      <section className="relative overflow-hidden rounded-3xl bg-ink-950 text-white p-7 lg:p-10 shadow-lift">
+        {/* Layered gradient for depth — darker base + brand radial glow */}
         <div className="absolute inset-0 bg-brand-radial opacity-90 pointer-events-none" />
-        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <span className="inline-flex items-center gap-1.5 ai-chip mb-3">
+        <div
+          className="absolute inset-0 pointer-events-none opacity-60"
+          style={{
+            backgroundImage:
+              'radial-gradient(ellipse at 15% 20%, rgba(34,197,94,0.25), transparent 55%), radial-gradient(ellipse at 85% 90%, rgba(20,184,166,0.22), transparent 55%)',
+          }}
+        />
+        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-1.5 ai-chip mb-4">
               <Sparkles className="w-3 h-3" /> AI-powered intelligence
             </span>
-            <h2 className="text-2xl lg:text-3xl font-bold leading-tight">
-              Welcome back — your <span className="gradient-text">intelligence partner</span> is live.
+            <h2 className="hero-headline text-3xl lg:text-4xl xl:text-[2.75rem]">
+              Welcome back — your{' '}
+              <span className="gradient-text-bright">intelligence partner</span>{' '}
+              is live.
             </h2>
-            <p className="mt-2 text-ink-300 max-w-xl text-sm lg:text-base">
-              What are we doing today?
+            <p className="mt-3 text-ink-300 max-w-xl text-sm lg:text-base font-normal">
+              Upload a meeting, capture a call, or review what AI surfaced for you today.
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
